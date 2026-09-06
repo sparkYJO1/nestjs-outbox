@@ -15,9 +15,10 @@ export interface OutboxMessage {
  * same transaction as the business write, so there is no window where the order
  * exists and the event does not, or the reverse.
  *
- * Passing a pool instead of a transaction client type-checks and silently
- * destroys the guarantee, which is why the parameter is named `tx` and why
- * `assertInTransaction` exists.
+ * The type only gets you halfway. A `Pool` will not type-check here, but a
+ * `PoolClient` taken from `pool.connect()` with no `BEGIN` issued on it will —
+ * right type, no transaction, guarantee silently gone. Nothing in the type
+ * system separates those two clients, which is why `assertInTransaction` runs.
  */
 export async function enqueue(
   tx: PoolClient,
@@ -38,7 +39,9 @@ export async function enqueue(
 /**
  * Postgres reports the current transaction state in `pg_stat_activity`, but the
  * cheap check is simpler: outside a transaction every statement auto-commits,
- * so a savepoint is a syntax error. We use that.
+ * so a savepoint has nothing to attach to and Postgres refuses it with
+ * `25P01 no_active_sql_transaction`. We use that. (It is class 25 —
+ * invalid transaction state — not a syntax error.)
  */
 async function assertInTransaction(tx: PoolClient): Promise<void> {
   try {
@@ -47,8 +50,8 @@ async function assertInTransaction(tx: PoolClient): Promise<void> {
   } catch {
     throw new Error(
       "enqueue() must be called inside a transaction. " +
-        "Passing a Pool rather than a transaction client compiles fine and " +
-        "removes the only guarantee this library provides.",
+        "A PoolClient with no BEGIN issued on it compiles fine and removes " +
+        "the only guarantee this library provides.",
     );
   }
 }

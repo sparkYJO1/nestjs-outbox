@@ -79,10 +79,12 @@ describe("enqueue", () => {
     ).toBe(1);
   });
 
-  it("refuses a pool client, because that silently removes the guarantee", async () => {
+  it("refuses a client that is not in a transaction — the case types cannot catch", async () => {
     const client = await pool.connect();
     try {
-      // Not in a transaction. Types cannot catch this; the runtime check must.
+      // A real PoolClient of the right type, with no BEGIN issued on it. This
+      // is what actually compiles — a Pool would not. Only the runtime check
+      // separates them.
       await expect(
         enqueue(client, { topic: TOPIC, key: "x", value: {} }),
       ).rejects.toThrow(/must be called inside a transaction/);

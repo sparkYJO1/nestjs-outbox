@@ -37,9 +37,14 @@ they are two systems and one of them is going to fail eventually.
 The outbox makes it one write. The event goes into a table in the same
 transaction as the business row, and a relay publishes it afterwards.
 
-`enqueue` takes a transaction client and **rejects a pool client at runtime**.
-Passing a pool type-checks perfectly and silently removes the only guarantee
-this library provides, so it fails loudly instead.
+`enqueue` takes a transaction client and **checks at runtime that it is really
+in a transaction**.
+
+The types get you halfway. Hand it a `Pool` and TypeScript rejects it — `Pool`
+is not assignable to `PoolClient`. What compiles cleanly is a `PoolClient` you
+took from `pool.connect()` and never issued `BEGIN` on: correct type, no
+transaction, and every guarantee this library provides quietly gone. No type
+distinguishes those two clients, so the check has to happen at runtime.
 
 ## What it promises, and what it does not
 
@@ -79,7 +84,8 @@ npm run infra:down
 ```
 
 They assert the uncomfortable cases too: rollback takes the event with it, a
-pool client is rejected, a failed publish leaves the row and increments
+correctly-typed client with no `BEGIN` on it is rejected, a failed publish
+leaves the row and increments
 `attempts`, a row past `maxAttempts` stops being picked up, and a duplicate
 after TTL expiry runs again.
 
