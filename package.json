@@ -3,13 +3,39 @@
   "version": "0.1.0",
   "description": "Transactional outbox and idempotent consumers for NestJS, Postgres and Kafka-compatible brokers",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sparkYJO1/nestjs-outbox.git"
+  },
+  "homepage": "https://github.com/sparkYJO1/nestjs-outbox#readme",
+  "bugs": {
+    "url": "https://github.com/sparkYJO1/nestjs-outbox/issues"
+  },
+  "author": "John Yoon",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist", "README.md", "LICENSE"],
-  "keywords": ["nestjs", "outbox", "transactional-outbox", "kafka", "redpanda", "postgres", "idempotency", "exactly-once"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "nestjs",
+    "outbox",
+    "transactional-outbox",
+    "kafka",
+    "redpanda",
+    "postgres",
+    "idempotency",
+    "exactly-once"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "prepare": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build && npm test",
     "test": "vitest run",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "infra:up": "docker compose up -d --wait",
