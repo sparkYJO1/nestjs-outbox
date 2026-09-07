@@ -35,11 +35,12 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "prepare": "tsc -p tsconfig.json",
-    "prepublishOnly": "npm run build && npm test",
-    "test": "vitest run",
+    "prepublishOnly": "npm run build",
+    "test": "vitest run --config vitest.integration.config.ts",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "infra:up": "docker compose up -d --wait",
-    "infra:down": "docker compose down -v"
+    "infra:down": "docker compose down -v",
+    "test:unit": "vitest run"
   },
   "peerDependencies": {
     "@nestjs/common": ">=10",
